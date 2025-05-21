@@ -1,0 +1,43 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+    background: #f0f0f0;
+  }
+  
+  .calculator {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 320px;
+  }
+  
+  .display {
+    height: 60px;
+    font-size: 2rem;
+    text-align: right;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .keyboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  
+  .button {
+    padding: 20px;
+    font-size: 1.2rem;
+    background: #ddd;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
