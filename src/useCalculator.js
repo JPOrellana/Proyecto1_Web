@@ -1,86 +1,87 @@
-const useCalculator = () => {
-    const [display, setDisplay] = React.useState('0')
-    const [operation, setOperation] = React.useState(null)
-    const [storedValue, setStoredValue] = React.useState(null)
-    const [shouldReset, setShouldReset] = React.useState(false)
-  
-    const isError = v => v < 0 || v > 999999999
-    const format = v => v.toString().length > 9 ? 'ERROR' : v
-  
-    const inputDigit = d => {
-      if (display === 'ERROR') return
-      if (shouldReset) {
-        setDisplay(d)
-        setShouldReset(false)
-      } else {
-        const newVal = display === '0' ? d : display + d
-        if (newVal.length <= 9) setDisplay(newVal)
-      }
-    }
-  
-    const inputDot = () => {
-      if (shouldReset) {
-        setDisplay('0.')
-        setShouldReset(false)
-      } else if (!display.includes('.') && display.length < 9) {
-        setDisplay(display + '.')
-      }
-    }
-  
-    const toggleSign = () => {
-      if (display.startsWith('-')) {
-        setDisplay(display.slice(1))
-      } else if (display.length < 9) {
-        setDisplay('-' + display)
-      }
-    }
-  
-    const handleOperation = op => {
-      if (operation && storedValue !== null) {
-        calculate()
-      } else {
-        setStoredValue(parseFloat(display))
-      }
-      setOperation(op)
-      setShouldReset(true)
-    }
-  
-    const calculate = () => {
-      const a = storedValue
-      const b = parseFloat(display)
-      let result
-      if (operation === '+') result = a + b
-      if (operation === '-') result = a - b
-      if (operation === '*') result = a * b
-      if (operation === '/') result = a / b
-      if (operation === '%') result = a % b
-  
-      if (isError(result)) {
-        setDisplay('ERROR')
-      } else {
-        const val = result.toString().slice(0, 9)
-        setDisplay(val)
-        setStoredValue(result)
-      }
-      setShouldReset(true)
-      setOperation(null)
-    }
-  
-    const clear = () => {
-      setDisplay('0')
-      setOperation(null)
-      setStoredValue(null)
-      setShouldReset(false)
-    }
-  
-    return {
-      display,
-      inputDigit,
-      inputDot,
-      toggleSign,
-      handleOperation,
-      calculate,
-      clear
+import { useState } from 'react'
+
+export function useCalculator() {
+  const [display, setDisplay] = useState('0')
+  const [operand, setOperand] = useState(null)
+  const [operator, setOperator] = useState(null)
+  const [overwrite, setOverwrite] = useState(false)
+
+  const MAX_LENGTH = 9
+  const ERROR = 'ERROR'
+
+  const inputDigit = (digit) => {
+    if (display === ERROR) return
+    if (overwrite || display === '0') {
+      setDisplay(digit)
+      setOverwrite(false)
+    } else if (display.length < MAX_LENGTH) {
+      setDisplay(display + digit)
     }
   }
-  
+
+  const handleOperation = (op) => {
+    if (display === ERROR) return
+
+    const current = parseFloat(display)
+
+    if (operator && operand !== null && !overwrite) {
+      const result = performCalculation(operand, current, operator)
+      if (result === ERROR) {
+        setDisplay(ERROR)
+        reset()
+        return
+      }
+      setOperand(result)
+      setDisplay(result.toString().slice(0, MAX_LENGTH))
+    } else {
+      setOperand(current)
+    }
+
+    setOperator(op)
+    setOverwrite(true)
+  }
+
+  const calculate = () => {
+    if (operator === null || operand === null || display === ERROR) return
+
+    const current = parseFloat(display)
+    const result = performCalculation(operand, current, operator)
+
+    if (result === ERROR) {
+      setDisplay(ERROR)
+    } else {
+      setDisplay(result.toString().slice(0, MAX_LENGTH))
+    }
+
+    reset()
+  }
+
+  const performCalculation = (a, b, op) => {
+    let result
+
+    switch (op) {
+      case '+': result = a + b; break
+      case '-': result = a - b; break
+      case '*': result = a * b; break
+      case '/': result = b !== 0 ? a / b : ERROR; break
+      case '%': result = a % b; break
+      default: return ERROR
+    }
+
+    if (isNaN(result) || result < 0 || result > 999999999) return ERROR
+    return result
+  }
+
+  const reset = () => {
+    setOperand(null)
+    setOperator(null)
+    setOverwrite(true)
+  }
+
+  return {
+    display,
+    inputDigit,
+    handleOperation,
+    calculate
+  }
+}
