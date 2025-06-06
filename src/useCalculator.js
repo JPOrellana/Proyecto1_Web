@@ -1,6 +1,6 @@
-import { useState } from 'react'
+const { useState } = React
 
-export function useCalculator() {
+const useCalculator = () => {
   const [display, setDisplay] = useState('0')
   const [operand, setOperand] = useState(null)
   const [operator, setOperator] = useState(null)
@@ -78,10 +78,28 @@ export function useCalculator() {
     setOverwrite(true)
   }
 
+  const clear = () => {
+    setDisplay('0')
+    reset()
+  }
+
+  const toggleSign = () => {
+    if (display === ERROR) return
+    if (display.startsWith('-')) {
+      setDisplay(display.slice(1))
+    } else {
+      setDisplay('-' + display)
+    }
+  }
+
   return {
     display,
     inputDigit,
     handleOperation,
-    calculate
+    calculate,
+    clear,
+    toggleSign
   }
 }
+
+
